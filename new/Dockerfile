@@ -1,7 +1,21 @@
 FROM centos/s2i-base-centos7
-MAINTAINER "Yiliyaer"
+
+# This image provides a Node.JS environment you can use to run your Node.JS
+# applications.
 
 EXPOSE 8080
+
+# Add $HOME/node_modules/.bin to the $PATH, allowing user to make npm scripts
+# available on the CLI without using npm's --global installation mode
+# This image will be initialized with "npm run $NPM_RUN"
+# See https://docs.npmjs.com/misc/scripts, and your repo's package.json
+# file for possible values of NPM_RUN
+# Description
+# Environment:
+# * $NPM_RUN - Select an alternate / custom runtime mode, defined in your package.json files' scripts section (default: npm run "start").
+# Expose ports:
+# * 8080 - Unprivileged port used by nodejs application
+
 ENV NODEJS_VERSION=8 \
     NPM_RUN=start \
     NAME=nodejs \
@@ -9,7 +23,12 @@ ENV NODEJS_VERSION=8 \
     PATH=$HOME/node_modules/.bin/:$HOME/.npm-global/bin/:$PATH
 
 ENV SUMMARY="Platform for building and running Node.js $NODEJS_VERSION applications" \
-    DESCRIPTION="my nodejs image"
+    DESCRIPTION="Node.js $NODEJS_VERSION available as docker container is a base platform for \
+building and running various Node.js $NODEJS_VERSION applications and frameworks. \
+Node.js is a platform built on Chrome's JavaScript runtime for easily building \
+fast, scalable network applications. Node.js uses an event-driven, non-blocking I/O model \
+that makes it lightweight and efficient, perfect for data-intensive real-time applications \
+that run across distributed devices."
 
 LABEL summary="$SUMMARY" \
       description="$DESCRIPTION" \
@@ -38,6 +57,7 @@ RUN yum install -y centos-release-scl-rh && \
     rpm -V $INSTALL_PKGS && \
     yum clean all -y
 
+
 #install crontab
 RUN yum install cronie -y 
 #install EPEL
@@ -48,12 +68,7 @@ RUN yum install nginx -y
 RUN yum install httpd -y
 #install socat
 RUN yum install socat -y
-#install npm/nodejs
-RUN curl -sL https://rpm.nodesource.com/setup_8.x | bash -
-RUN yum install -y nodejs; yum clean all -y
 
-RUN echo "Packages are all installed. Now installing acme script."
-RUN curl https://get.acme.sh | sh
 
 # Copy the S2I scripts from the specific language image to $STI_SCRIPTS_PATH
 COPY ./s2i/bin/ $STI_SCRIPTS_PATH
@@ -67,6 +82,5 @@ RUN chown -R 1001:0 ${APP_ROOT} && chmod -R ug+rwx ${APP_ROOT} && \
 
 USER 1001
 
-RUN npm install
-
-CMD [ "npm", " ." ]
+# Set the default CMD to print the usage of the language image
+CMD $STI_SCRIPTS_PATH/usage
