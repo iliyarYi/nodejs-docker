@@ -1,0 +1,4 @@
+Host bitbucket.org
+     RSAAuthentication        yes
+     IdentityFile             /opt/app-root/src/id_rsavi
+     StrictHostKeyChecking    no

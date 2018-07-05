@@ -39,7 +39,7 @@ RUN yum install -y centos-release-scl-rh && \
     yum clean all -y
 
 #install crontab
-RUN yum install cronie -y 
+RUN yum -y install cronie
 #install EPEL
 RUN yum install epel-release -y
 #install nginx
@@ -54,6 +54,13 @@ RUN yum install -y nodejs; yum clean all -y
 
 RUN echo "Packages are all installed. Now installing acme script."
 RUN curl https://get.acme.sh | sh
+
+RUN mkdir /opt/app-root/src/.ssh && chmod 700 /opt/app-root/src/.ssh
+
+COPY ./tmp/config /opt/app-root/src/.ssh
+RUN chmod 400 /opt/app-root/src/.ssh
+
+RUN chmod g+w /etc/passwd
 
 # Copy the S2I scripts from the specific language image to $STI_SCRIPTS_PATH
 COPY ./s2i/bin/ $STI_SCRIPTS_PATH
